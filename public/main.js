@@ -4,7 +4,7 @@ let infoWindow;
 let dataList = [];
 
 const continentCenters = {
-  "All":{lat:0, lng:0},
+  "All":{lat:20, lng:10},
   "North America": { lat: 37.0902, lng: -95.7129 },
   "Europe": { lat: 54.5260, lng: 15.2551 },
   "Asia": { lat: 24.0479, lng: 100.6197 },
@@ -19,34 +19,24 @@ function initMap() {
   });
 
   fetch("data.json")
-    .then(res => {
-      //console.log("✅ fetch 응답:", res);
-      return res.json();
-    })
+    .then(res => res.json())
     .then(data => {
       dataList = data;
-      showAllMarkers();
-      //console.log("✅ data 응답:", dataList);
-      // showContinent("Asia", this);
+      initMarkers();
     })
     .catch(error => console.error('JSON file load error', error));
-
 }
 
-function showAllMarkers() {
-  markers.forEach(marker => marker.setVisible(false)); // 기존 마커 숨기기
-
+// 초기 로드 시 전체 마커 한 번만 생성
+function initMarkers() {
   dataList.forEach(univ => {
-    createMarker(univ.lat, univ.lng, univ);
+    const marker = createMarker(univ.lat, univ.lng, univ);
+    marker._continent = univ.대륙;
+    markers.push(marker);
   });
 
   map.setCenter(continentCenters["All"]);
   map.setZoom(2);
-
-  // 버튼 선택 해제
-  document.querySelectorAll(".continentButtonArea button").forEach(btn => {
-    btn.classList.remove("selected");
-  });
 }
 
 function createMarker(lat, lng, university) {
@@ -106,7 +96,6 @@ function createMarker(lat, lng, university) {
       `
   })
 
-  //Currently opened hoverWindow
   let openDetailedInfoWindow = null;
 
   marker.addListener('mouseover', () => {
@@ -122,7 +111,6 @@ function createMarker(lat, lng, university) {
   });
 
   marker.addListener('click', () => {
-
     if (openDetailedInfoWindow) {
       openDetailedInfoWindow.close();
     }
@@ -136,36 +124,32 @@ function createMarker(lat, lng, university) {
     });
   });
 
-  markers.push(marker);
+  return marker;
+}
+
+function showAllMarkers() {
+  markers.forEach(marker => marker.setVisible(true));
+
+  map.setCenter(continentCenters["All"]);
+  map.setZoom(2);
+
+  document.querySelectorAll(".continentButtonArea button").forEach(btn => {
+    btn.classList.remove("selected");
+  });
 }
 
 function showContinent(continent, clickedButton) {
+  // visibility 토글만 — 마커 새로 생성하지 않음
+  markers.forEach(marker => {
+    marker.setVisible(marker._continent === continent);
+  });
 
-  //Hide Origin Markers
-  markers.forEach(marker => marker.setVisible(false));
-
-  //Go to the selected continent
   map.setCenter(continentCenters[continent]);
   map.setZoom(4);
 
-  // 모든 버튼에서 selected 제거
   document.querySelectorAll(".continentButtonArea button").forEach(btn => {
     btn.classList.remove("selected");
   });
 
   if (clickedButton) clickedButton.classList.add("selected");
-
-  // 클릭된 버튼에 selected 클래스 추가
-  // clickedButton.classList.add("selected");
-
-  //Show the markers of selected continent
-  dataList
-    .filter(univ => univ.대륙 === continent)
-    .forEach(univ => {
-      createMarker(univ.lat, univ.lng, univ);
-      console.log("📍 마커 생성:", univ.파견기관, univ.lat, univ.lng);
-    });
 }
-
-console.log("데이터:", dataList);
-console.log("필터된 결과:", dataList.filter(u => u.Continent === 'North America'));

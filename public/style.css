@@ -58,6 +58,12 @@ html {
   font-weight: bold;
 }
 
+/* All 버튼 기본 강조 */
+.continentButtonArea button.btn-all {
+  background-color: #f1f3f5;
+  font-weight: bold;
+}
+
 
 .hoverWindow {
   font-family: Arial, sans-serif;

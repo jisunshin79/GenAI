@@ -5,7 +5,7 @@ const app = express();
 app.use(express.static('public'));  // public 폴더 정적 제공
 
 app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public/website.html'));
+  res.sendFile(path.join(__dirname, 'public/index.html'));
 });
 
 const PORT = 3000;
