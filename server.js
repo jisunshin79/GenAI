@@ -17,7 +17,9 @@ const universityData = JSON.parse(
 const universityDataStr = JSON.stringify(universityData);
 
 app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public/index.html'));
+  const html = fs.readFileSync(path.join(__dirname, 'public/index.html'), 'utf-8');
+  const injected = html.replace('ENTER YOUR API KEY', process.env.GOOGLE_MAPS_API_KEY || '');
+  res.send(injected);
 });
 
 // POST /api/recommend
