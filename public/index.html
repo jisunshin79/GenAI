@@ -4,18 +4,10 @@
   <meta charset="UTF-8">
   <title>Exchange Universities Map</title>
   <link rel="stylesheet" href="style.css" />
-  <style>
-    #map {
-      width: 100%;
-      height: 100%;
-    }
-    #filters {
-      margin-bottom: 1rem;
-    }
-  </style>
 </head>
 <body>
-  
+
+  <!-- 대륙 필터 버튼 -->
   <div id="continentButtonArea" class="continentButtonArea">
     <button onclick="showAllMarkers()" class="btn-all">All</button>
     <button onclick="showContinent('Asia', this)">Asia</button>
@@ -25,13 +17,109 @@
     <button onclick="showContinent('Latin America', this)">Latin America</button>
   </div>
 
+  <!-- 지도 -->
   <div id="map"></div>
 
-  <!-- main.js는 맨 아래에 -->
-  <script src="main.js"></script>
+  <!-- AI 패널 토글 버튼 -->
+  <button id="aiToggleBtn" class="ai-toggle-btn">✨ AI 추천</button>
 
-  <!-- Google Maps API 키 넣기 -->
-  <script 
+  <!-- AI 어드바이저 사이드 패널 -->
+  <div id="aiPanel" class="ai-panel">
+    <div class="ai-panel-header">
+      <span>🎓 AI 교환학생 어드바이저</span>
+      <button id="aiCloseBtn" class="ai-close-btn">✕</button>
+    </div>
+
+    <!-- 탭 -->
+    <div class="ai-tabs">
+      <button class="ai-tab-btn active" data-tab="chat">💬 자유 검색</button>
+      <button class="ai-tab-btn" data-tab="profile">📋 맞춤 진단</button>
+    </div>
+
+    <!-- 자유 검색 탭 -->
+    <div id="chatTab" class="ai-tab-content active">
+      <p class="ai-hint">조건을 자유롭게 입력하면 AI가 최적의 학교를 추천해드려요.</p>
+      <div class="example-chips">
+        <button class="chip" onclick="fillExample('GPA 3.3이고 유럽에서 영어로 수업하는 대학 추천해줘')">유럽 영어권</button>
+        <button class="chip" onclick="fillExample('전공 제한 없는 북미 학교 알려줘')">북미 전공무관</button>
+        <button class="chip" onclick="fillExample('어학 점수 기준이 낮은 아시아 대학 추천해줘')">아시아 어학완화</button>
+      </div>
+      <textarea id="chatInput" class="ai-textarea" placeholder="예: GPA 3.5인데 영어권 대학 추천해줘"></textarea>
+      <button id="chatSubmitBtn" class="ai-submit-btn">검색하기</button>
+    </div>
+
+    <!-- 맞춤 진단 탭 -->
+    <div id="profileTab" class="ai-tab-content">
+      <p class="ai-hint">나의 조건을 입력하면 맞춤 대학을 진단해드려요.</p>
+      <form id="profileForm">
+        <div class="form-row">
+          <label>GPA</label>
+          <input type="number" name="cgpa" step="0.01" min="0" max="4.5" placeholder="3.50" required>
+          <select name="cgpaScale">
+            <option value="4.5">/ 4.5</option>
+            <option value="4.3">/ 4.3</option>
+            <option value="4.0">/ 4.0</option>
+          </select>
+        </div>
+        <div class="form-row">
+          <label>희망 지역</label>
+          <select name="region">
+            <option value="">전체</option>
+            <option value="Asia">Asia</option>
+            <option value="North America">North America</option>
+            <option value="Europe">Europe</option>
+            <option value="Oceania">Oceania</option>
+            <option value="Latin America">Latin America</option>
+          </select>
+        </div>
+        <div class="form-row">
+          <label>강의언어</label>
+          <select name="language">
+            <option value="">상관없음</option>
+            <option value="영어">영어</option>
+            <option value="불어">불어</option>
+            <option value="스페인어">스페인어</option>
+          </select>
+        </div>
+        <div class="form-row">
+          <label>TOEFL</label>
+          <input type="number" name="toefl" min="0" max="120" placeholder="iBT 점수">
+        </div>
+        <div class="form-row">
+          <label>IELTS</label>
+          <input type="number" name="ielts" step="0.5" min="0" max="9" placeholder="점수">
+        </div>
+        <div class="form-row">
+          <label>전공</label>
+          <input type="text" name="major" placeholder="예: 경영, 컴퓨터공학">
+        </div>
+        <div class="form-row">
+          <label>추가 요청</label>
+          <input type="text" name="notes" placeholder="예: 기숙사 있는 곳">
+        </div>
+        <button type="submit" class="ai-submit-btn">진단 시작</button>
+      </form>
+    </div>
+
+    <!-- 로딩 -->
+    <div id="aiLoading" class="ai-loading hidden">
+      <div class="spinner"></div>
+      <p>AI가 분석 중이에요...</p>
+    </div>
+
+    <!-- 결과 -->
+    <div id="aiResults" class="ai-results hidden">
+      <div class="ai-results-header">
+        <span>추천 결과</span>
+        <button onclick="resetAiResults()" class="reset-btn">← 전체 보기</button>
+      </div>
+      <div id="aiExplanation" class="ai-explanation"></div>
+      <div id="aiUnivList" class="ai-univ-list"></div>
+    </div>
+  </div>
+
+  <script src="main.js"></script>
+  <script
     src="https://maps.googleapis.com/maps/api/js?key=ENTER YOUR API KEY&callback=initMap"
     async defer>
   </script>

@@ -7,17 +7,15 @@ html {
   font-family: Arial, sans-serif;
 }
 
-.map-container {
-  height: 100%;
-  width: 100%;
-}
-
 #map {
-  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
   width: 100%;
+  height: 100%;
 }
 
-/* 버튼 영역 전체를 상단에 고정, 가운데 정렬 */
+/* ===== 대륙 필터 버튼 바 ===== */
 .continentButtonArea {
   position: absolute;
   top: 20px;
@@ -33,7 +31,6 @@ html {
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 }
 
-/* 각 버튼 스타일 */
 .continentButtonArea button {
   padding: 10px 16px;
   border-radius: 8px;
@@ -45,12 +42,10 @@ html {
   transition: all 0.3s ease;
 }
 
-/* 호버 시 */
 .continentButtonArea button:hover {
   background-color: #d0ebff;
 }
 
-/* 클릭된 (선택된) 버튼 */
 .continentButtonArea button.selected {
   background-color: #339af0;
   color: white;
@@ -58,21 +53,16 @@ html {
   font-weight: bold;
 }
 
-/* All 버튼 기본 강조 */
 .continentButtonArea button.btn-all {
   background-color: #f1f3f5;
   font-weight: bold;
 }
 
-
+/* ===== 마커 팝업 ===== */
 .hoverWindow {
   font-family: Arial, sans-serif;
   line-height: 1.5;
   max-width: 350px;
-}
-
-.hoverWindow .info-section {
-  margin-bottom: 12px;
 }
 
 .hoverWindow h3 {
@@ -94,4 +84,363 @@ html {
   padding-left: 16px;
   list-style-type: disc;
   font-size: 13px;
+}
+
+/* ===== AI 토글 버튼 ===== */
+.ai-toggle-btn {
+  position: absolute;
+  bottom: 32px;
+  right: 24px;
+  z-index: 20;
+  background: #339af0;
+  color: white;
+  border: none;
+  border-radius: 24px;
+  padding: 13px 22px;
+  font-size: 15px;
+  font-weight: bold;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(51, 154, 240, 0.45);
+  transition: all 0.2s ease;
+}
+
+.ai-toggle-btn:hover {
+  background: #228be6;
+  transform: translateY(-2px);
+}
+
+/* ===== AI 사이드 패널 ===== */
+.ai-panel {
+  position: absolute;
+  top: 0;
+  right: -420px;
+  width: 400px;
+  height: 100%;
+  background: white;
+  z-index: 15;
+  box-shadow: -4px 0 24px rgba(0, 0, 0, 0.12);
+  display: flex;
+  flex-direction: column;
+  transition: right 0.32s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+}
+
+.ai-panel.open {
+  right: 0;
+}
+
+.ai-panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  background: #339af0;
+  color: white;
+  font-size: 15px;
+  font-weight: bold;
+  flex-shrink: 0;
+}
+
+.ai-close-btn {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 20px;
+  cursor: pointer;
+  line-height: 1;
+  padding: 0 4px;
+}
+
+/* ===== 탭 ===== */
+.ai-tabs {
+  display: flex;
+  border-bottom: 2px solid #e9ecef;
+  flex-shrink: 0;
+}
+
+.ai-tab-btn {
+  flex: 1;
+  padding: 12px 8px;
+  border: none;
+  background: white;
+  cursor: pointer;
+  font-size: 14px;
+  color: #aaa;
+  transition: all 0.2s;
+}
+
+.ai-tab-btn.active {
+  color: #339af0;
+  border-bottom: 2px solid #339af0;
+  font-weight: bold;
+  margin-bottom: -2px;
+}
+
+/* ===== 탭 콘텐츠 ===== */
+.ai-tab-content {
+  display: none;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px 20px;
+  overflow-y: auto;
+}
+
+.ai-tab-content.active {
+  display: flex;
+}
+
+.ai-hint {
+  color: #888;
+  font-size: 13px;
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* ===== 예시 칩 ===== */
+.example-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.chip {
+  padding: 6px 12px;
+  background: #e7f5ff;
+  color: #339af0;
+  border: 1px solid #a5d8ff;
+  border-radius: 20px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.chip:hover {
+  background: #339af0;
+  color: white;
+  border-color: #339af0;
+}
+
+/* ===== 텍스트 입력 ===== */
+.ai-textarea {
+  width: 100%;
+  height: 90px;
+  padding: 10px 12px;
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  font-size: 14px;
+  resize: none;
+  box-sizing: border-box;
+  font-family: Arial, sans-serif;
+  transition: border-color 0.2s;
+}
+
+.ai-textarea:focus {
+  outline: none;
+  border-color: #339af0;
+}
+
+/* ===== 제출 버튼 ===== */
+.ai-submit-btn {
+  padding: 12px;
+  background: #339af0;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.2s;
+  width: 100%;
+}
+
+.ai-submit-btn:hover {
+  background: #228be6;
+}
+
+.ai-submit-btn:disabled {
+  background: #a5d8ff;
+  cursor: not-allowed;
+}
+
+/* ===== 맞춤 진단 폼 ===== */
+.form-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.form-row label {
+  min-width: 70px;
+  font-size: 13px;
+  color: #555;
+  font-weight: bold;
+}
+
+.form-row input,
+.form-row select {
+  flex: 1;
+  padding: 8px 10px;
+  border: 1px solid #dee2e6;
+  border-radius: 6px;
+  font-size: 13px;
+  transition: border-color 0.2s;
+}
+
+.form-row input:focus,
+.form-row select:focus {
+  outline: none;
+  border-color: #339af0;
+}
+
+#profileForm {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* ===== 로딩 ===== */
+.ai-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 40px 20px;
+  gap: 16px;
+}
+
+.ai-loading.hidden {
+  display: none;
+}
+
+.ai-loading p {
+  color: #888;
+  font-size: 14px;
+  margin: 0;
+}
+
+.spinner {
+  width: 36px;
+  height: 36px;
+  border: 4px solid #e9ecef;
+  border-top: 4px solid #339af0;
+  border-radius: 50%;
+  animation: spin 0.75s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ===== 결과 ===== */
+.ai-results {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px 20px;
+  border-top: 2px solid #e9ecef;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.ai-results.hidden {
+  display: none;
+}
+
+.ai-results-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.ai-results-header span {
+  font-weight: bold;
+  font-size: 15px;
+  color: #333;
+}
+
+.reset-btn {
+  font-size: 12px;
+  color: #339af0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+}
+
+.reset-btn:hover {
+  text-decoration: underline;
+}
+
+.ai-explanation {
+  background: #f8f9fa;
+  border-radius: 8px;
+  padding: 12px 14px;
+  font-size: 13px;
+  color: #555;
+  line-height: 1.7;
+  white-space: pre-wrap;
+}
+
+.ai-univ-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* ===== 추천 대학 카드 ===== */
+.ai-univ-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  background: white;
+  border: 1px solid #dee2e6;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.ai-univ-card:hover {
+  border-color: #339af0;
+  background: #f0f8ff;
+  transform: translateX(-2px);
+}
+
+.ai-univ-rank {
+  width: 26px;
+  height: 26px;
+  background: #339af0;
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: bold;
+  flex-shrink: 0;
+}
+
+.ai-univ-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.ai-univ-name {
+  font-size: 14px;
+  font-weight: bold;
+  color: #333;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ai-univ-sub {
+  font-size: 12px;
+  color: #888;
+  margin-top: 2px;
+}
+
+.ai-univ-arrow {
+  color: #ccc;
+  font-size: 16px;
+  flex-shrink: 0;
 }

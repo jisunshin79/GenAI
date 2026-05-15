@@ -1,6 +1,8 @@
 {
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.96.0",
     "csv-parser": "^3.2.0",
+    "dotenv": "^17.4.2",
     "express": "^5.1.0",
     "node-fetch": "^3.3.2"
   }
