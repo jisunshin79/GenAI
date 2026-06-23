@@ -4,7 +4,7 @@ html {
   padding: 0;
   height: 100%;
   overflow: hidden;
-  font-family: Arial, sans-serif;
+  font-family: 'Inter', 'Noto Sans KR', Arial, sans-serif;
 }
 
 #map {
@@ -25,65 +25,137 @@ html {
   flex-wrap: wrap;
   gap: 10px;
   z-index: 10;
-  background-color: rgba(255, 255, 255, 0.9);
+  background-color: rgba(255, 255, 255, 0.65);
+  backdrop-filter: blur(14px) saturate(160%);
+  -webkit-backdrop-filter: blur(14px) saturate(160%);
   padding: 10px 20px;
-  border-radius: 10px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
 }
 
 .continentButtonArea button {
   padding: 10px 16px;
-  border-radius: 8px;
-  border: 1px solid #ccc;
-  background-color: white;
+  border-radius: 10px;
+  border: 1px solid rgba(204, 204, 204, 0.6);
+  background-color: rgba(255, 255, 255, 0.7);
   color: #333;
   font-size: 15px;
+  font-family: inherit;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.25s ease;
 }
 
 .continentButtonArea button:hover {
   background-color: #d0ebff;
+  transform: translateY(-1px);
 }
 
 .continentButtonArea button.selected {
-  background-color: #339af0;
+  background: linear-gradient(135deg, #4dabf7, #3b5bdb);
   color: white;
-  border-color: #339af0;
-  font-weight: bold;
+  border-color: transparent;
+  font-weight: 600;
+  box-shadow: 0 4px 12px rgba(59, 91, 219, 0.35);
 }
 
 .continentButtonArea button.btn-all {
-  background-color: #f1f3f5;
-  font-weight: bold;
+  background-color: rgba(241, 243, 245, 0.8);
+  font-weight: 600;
 }
 
-/* ===== 마커 팝업 ===== */
-.hoverWindow {
-  font-family: Arial, sans-serif;
+/* ===== 마커 팝업 (Google InfoWindow 기본 chrome 제거 후 커스텀 카드로 대체) ===== */
+.gm-style .gm-style-iw-c {
+  padding: 0;
+  border-radius: 16px;
+  box-shadow: 0 16px 32px rgba(0, 0, 0, 0.16);
+}
+
+.gm-style .gm-style-iw-d {
+  overflow: visible !important;
+  padding: 0;
+}
+
+.gm-style-iw-chr {
+  height: 0;
+}
+
+.gm-ui-hover-effect {
+  top: 4px !important;
+  right: 4px !important;
+}
+
+.popupCard {
+  font-family: inherit;
   line-height: 1.5;
-  max-width: 350px;
+  max-width: 320px;
+  padding: 16px 18px 14px;
+  border-top: 4px solid #7048e8;
+  border-radius: 16px 16px 0 0;
 }
 
-.hoverWindow h3 {
-  text-align: center;
-  color: #555;
+.popupTitle {
+  margin: 2px 0 4px;
+  font-size: 17px;
+  font-weight: 700;
+  color: #111113;
 }
 
-.hoverWindow h4.smallCity {
-  text-align: center;
-}
-
-.hoverWindow ul {
-  padding-left: 20px;
-  color: #555;
-  list-style-type: disc;
-}
-
-.hoverWindow .infoList {
-  padding-left: 16px;
-  list-style-type: disc;
+.popupCity {
   font-size: 13px;
+  color: #5c5f66;
+  margin-bottom: 8px;
+}
+
+.popupNote {
+  font-size: 13px;
+  color: #1f2024;
+  background: #f8f9fa;
+  border-radius: 8px;
+  padding: 7px 10px;
+  margin-top: 6px;
+  line-height: 1.45;
+}
+
+.popupCard--detail {
+  max-width: 640px;
+}
+
+.popupGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.popupPill {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  background: #f3f0ff;
+  border-radius: 8px;
+  padding: 8px 10px;
+}
+
+.popupPillLabel {
+  color: #6228d7;
+  font-weight: 700;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.popupPillValue {
+  color: #111113;
+  font-size: 14px;
+  white-space: normal;
+  word-break: break-word;
+  line-height: 1.4;
+}
+
+.popupNotes {
+  margin-top: 10px;
+  padding-top: 8px;
+  border-top: 1px solid #e9ecef;
 }
 
 /* ===== AI 토글 버튼 ===== */
@@ -92,20 +164,21 @@ html {
   bottom: 32px;
   right: 24px;
   z-index: 20;
-  background: #339af0;
+  background: #7048e8;
   color: white;
   border: none;
   border-radius: 24px;
   padding: 13px 22px;
   font-size: 15px;
-  font-weight: bold;
+  font-weight: 600;
+  font-family: inherit;
   cursor: pointer;
-  box-shadow: 0 4px 14px rgba(51, 154, 240, 0.45);
+  box-shadow: 0 6px 20px rgba(112, 72, 232, 0.4);
   transition: all 0.2s ease;
 }
 
 .ai-toggle-btn:hover {
-  background: #228be6;
+  box-shadow: 0 8px 26px rgba(112, 72, 232, 0.5);
   transform: translateY(-2px);
 }
 
@@ -133,11 +206,11 @@ html {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 16px 20px;
-  background: #339af0;
+  padding: 18px 20px;
+  background: #7048e8;
   color: white;
   font-size: 15px;
-  font-weight: bold;
+  font-weight: 600;
   flex-shrink: 0;
 }
 
@@ -170,9 +243,9 @@ html {
 }
 
 .ai-tab-btn.active {
-  color: #339af0;
-  border-bottom: 2px solid #339af0;
-  font-weight: bold;
+  color: #7048e8;
+  border-bottom: 2px solid #7048e8;
+  font-weight: 600;
   margin-bottom: -2px;
 }
 
@@ -205,19 +278,20 @@ html {
 
 .chip {
   padding: 6px 12px;
-  background: #e7f5ff;
-  color: #339af0;
-  border: 1px solid #a5d8ff;
+  background: #f3f0ff;
+  color: #7048e8;
+  border: 1px solid #d0bfff;
   border-radius: 20px;
   font-size: 12px;
+  font-family: inherit;
   cursor: pointer;
   transition: all 0.2s;
 }
 
 .chip:hover {
-  background: #339af0;
+  background: #7048e8;
   color: white;
-  border-color: #339af0;
+  border-color: transparent;
 }
 
 /* ===== 텍스트 입력 ===== */
@@ -230,35 +304,37 @@ html {
   font-size: 14px;
   resize: none;
   box-sizing: border-box;
-  font-family: Arial, sans-serif;
+  font-family: inherit;
   transition: border-color 0.2s;
 }
 
 .ai-textarea:focus {
   outline: none;
-  border-color: #339af0;
+  border-color: #7048e8;
 }
 
 /* ===== 제출 버튼 ===== */
 .ai-submit-btn {
   padding: 12px;
-  background: #339af0;
+  background: #7048e8;
   color: white;
   border: none;
   border-radius: 8px;
   font-size: 15px;
-  font-weight: bold;
+  font-weight: 600;
+  font-family: inherit;
   cursor: pointer;
-  transition: background 0.2s;
+  transition: all 0.2s;
   width: 100%;
 }
 
 .ai-submit-btn:hover {
-  background: #228be6;
+  box-shadow: 0 4px 14px rgba(112, 72, 232, 0.35);
+  transform: translateY(-1px);
 }
 
 .ai-submit-btn:disabled {
-  background: #a5d8ff;
+  background: #d0bfff;
   cursor: not-allowed;
 }
 
@@ -289,7 +365,7 @@ html {
 .form-row input:focus,
 .form-row select:focus {
   outline: none;
-  border-color: #339af0;
+  border-color: #7048e8;
 }
 
 #profileForm {
@@ -321,7 +397,7 @@ html {
   width: 36px;
   height: 36px;
   border: 4px solid #e9ecef;
-  border-top: 4px solid #339af0;
+  border-top: 4px solid #7048e8;
   border-radius: 50%;
   animation: spin 0.75s linear infinite;
 }
@@ -359,7 +435,7 @@ html {
 
 .reset-btn {
   font-size: 12px;
-  color: #339af0;
+  color: #7048e8;
   background: none;
   border: none;
   cursor: pointer;
@@ -370,12 +446,19 @@ html {
   text-decoration: underline;
 }
 
+.ai-explanation-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #7048e8;
+}
+
 .ai-explanation {
-  background: #f8f9fa;
-  border-radius: 8px;
+  background: #f3f0ff;
+  border-left: 3px solid #7048e8;
+  border-radius: 4px 12px 12px 12px;
   padding: 12px 14px;
   font-size: 13px;
-  color: #555;
+  color: #495057;
   line-height: 1.7;
   white-space: pre-wrap;
 }
@@ -400,15 +483,15 @@ html {
 }
 
 .ai-univ-card:hover {
-  border-color: #339af0;
-  background: #f0f8ff;
+  border-color: #7048e8;
+  background: #f8f6ff;
   transform: translateX(-2px);
 }
 
 .ai-univ-rank {
   width: 26px;
   height: 26px;
-  background: #339af0;
+  background: #7048e8;
   color: white;
   border-radius: 50%;
   display: flex;

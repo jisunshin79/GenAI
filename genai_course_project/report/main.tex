@@ -1,0 +1,200 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% CVPR 2022 Paper Template
+% based on the CVPR template provided by Ming-Ming Cheng (https://github.com/MCG-NKU/CVPR_Template)
+% modified and extended by Stefan Roth (stefan.roth@NOSPAMtu-darmstadt.de)
+
+\documentclass[10pt,twocolumn,letterpaper]{article}
+
+%%%%%%%%% PAPER TYPE  - PLEASE UPDATE FOR FINAL VERSION
+\usepackage[cvpr]{cvpr}      % To produce the REVIEW version
+%\usepackage{cvpr}              % To produce the CAMERA-READY version
+%\usepackage[pagenumbers]{cvpr} % To force page numbers, e.g. for an arXiv version
+
+% Include other packages here, before hyperref.
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{booktabs}
+\usepackage{kotex}
+
+% It is strongly recommended to use hyperref, especially for the review version.
+% hyperref with option pagebackref eases the reviewers' job.
+% Please disable hyperref *only* if you encounter grave issues, e.g. with the
+% file validation for the camera-ready version.
+%
+% If you comment hyperref and then uncomment it, you should delete
+% ReviewTempalte.aux before re-running LaTeX.
+% (Or just hit 'q' on the first LaTeX run, let it finish, and you
+%  should be clear).
+\usepackage[pagebackref,breaklinks,colorlinks]{hyperref}
+
+
+% Support for easy cross-referencing
+\usepackage[capitalize]{cleveref}
+\crefname{section}{Sec.}{Secs.}
+\Crefname{section}{Section}{Sections}
+\Crefname{table}{Table}{Tables}
+\crefname{table}{Tab.}{Tabs.}
+
+
+%%%%%%%%% PAPER ID  - PLEASE UPDATE
+\def\cvprPaperID{*****} % *** Enter the CVPR Paper ID here
+\def\confName{CVPR}
+\def\confYear{2022}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Write your paper here.
+
+\begin{document}
+
+%%%%%%%%% TITLE - PLEASE UPDATE
+\title{서강대 국제팀 교환학생 추천 시스템으로 본 검색 기반 방법과 생성형 LLM 비교}
+
+\author{Jisun Shin\\
+Art \& Technology in Sogang University\\
+{\tt\small revfamille@sogang.ac.kr}
+}
+
+\maketitle
+
+%%%%%%%%% ABSTRACT
+\begin{abstract}
+   CGPA, 어학 기준, 전공 제한처럼 답이 명확히 정해진 \emph{자격조건 매칭} 과제에서, 검색 기반 필터링과 생성형 LLM 중 어느 쪽이 더 나은지 직접 비교했다. 서강대 교환협정 대학 138개 데이터로 (1) 규칙 기반 필터링, (2) 소형 LLM(Qwen2.5-1.5B-Instruct) zero-shot, (3) 같은 모델을 32개 예시로 LoRA 파인튜닝한 것, 세 방법을 비교했다. 규칙 기반이 정확도(Precision@5, Recall@5)에서 두 LLM 방법을 크게 앞섰고, LLM 두 방법 모두 추천의 약 19\%가 실제로는 존재하지 않는 학교였다. 이 원인을 평가 기준의 한계, 검색 후보 수(top-$k$) 두 측면에서 분석하고, 검색 단계를 실제 웹 서비스에도 적용해보았다.
+\end{abstract}
+
+%%%%%%%%% BODY TEXT
+\section{Introduction}
+\label{sec:intro}
+
+서강대 교환학생 프로그램은 138개 학교마다 CGPA, 어학 성적, 전공 제한과 같은 자격조건이 다르다.
+학생들은 자기 조건에 맞는 학교를 찾기 위해 국제팀에서 제공하는 엑셀 파일을 일일이 스크롤하며 검색해야한다. 이 프로젝트는 "경영학 전공하는 학부생인데 유럽에서 영어로 수업하는 학교를 가고 싶고 CGPA는 3.5야" 같은 자연어 질문에 대해 각 학생에게 조건에 맞는 학교를 추천하는 시스템을 만들어, \textbf{조건이 주어진 추천 과제에서 생성형 LLM이 단순 규칙 기반 필터링보다 나은가?}를 확인한다. 이를 위해 규칙 기반 필터링과, 동일한 검색 결과를 받는 두 가지 생성형 방법(zero-shot, LoRA fine-tuned)을 같은 테스트셋(학교 후보 목록)으로 비교했다.
+
+%-------------------------------------------------------------------------
+\section{Related Work}
+Retrieval-Augmented Generation(RAG)~\cite{lewis2020rag}은 관련 정보를 미리 검색해서 LLM에게 넘겨주는 방법으로, 이 프로젝트의 검색 단계(다국어 임베딩~\cite{reimers2019sentencebert} 기반
+top-$k$ 검색)가 여기에 해당한다. 큰 모델(teacher)의 출력으로 작은 모델을 학습시키는 distillation도 흔히 쓰이는 방법인데, 이 프로젝트도 Claude를 teacher로 써서 Qwen2.5-1.5B-Instruct~\cite{qwen2024}를 LoRA~\cite{hu2021lora}로 파인튜닝했다. 다만 기존 연구가 보통 텍스트 생성 품질에 집중하는 것과 달리, 이 프로젝트는 \emph{정답이 정해진 필터링
+과제}에서 생성형 방법과 규칙 기반의 장단점을 비교한다.
+
+\section{Methods}
+\subsection{데이터와 검색}
+서강대 국제팀에서 엑셀 파일로 제공하는 교환협정 대학 138곳의 대륙, 국가, 도시, 강의언어, CGPA 기준, 어학 기준, 전공/학기 제한, 파견인원 정보를 사용했다. 각 학교의 정보를 일반 텍스트로 만든 뒤, 임베딩 모델 (\texttt{paraphrase-multilingual-MiniLM-L12-v2})로 변환하고, 질문 임베딩 $q$와 학교 임베딩
+$d_i$의 코사인 유사도
+
+\begin{equation}
+\text{sim}(q, d_i) = \frac{q \cdot d_i}{\lVert q \rVert \, \lVert d_i \rVert}
+\label{eq:cosine}
+\end{equation}
+
+가 가장 높은 상위 $k$개를 검색 후보로 사용했다.
+
+\subsection{비교한 세 방법}
+\textbf{(1) 규칙 기반}: 지역 및 학위 조건(학부/대학원)만 보고 필터링한 뒤 파견인원이 많은 순으로 상위 5개를 뽑는다. \textbf{(2) Zero-shot}: 검색된 후보를 Qwen2.5-1.5B-Instruct에
+주고 추가 학습 없이 추천을 바로 요청한다. \textbf{(3) Fine-tuned}: 같은 모델을 32개의 (질문, 검색 후보, 정답) 페르소나 예시로 LoRA 3 epoch 학습시켰다. LoRA는 원래 가중치 $W_0$는
+그대로 두고 작은 행렬 $B$, $A$만 학습해서
+
+\begin{equation}
+W = W_0 + BA
+\label{eq:lora}
+\end{equation}
+
+로 모델을 적응시키는 방법이다 ($r{=}16$, $\alpha{=}32$).
+
+\subsection{평가 방법과 한계}
+지역 및 학위 조건이 맞는지로 정답 집합 $G$를 정의하고, 추천 상위 5개 $T_5$에 대해
+
+\begin{equation}
+\text{Precision@5} = \frac{|T_5 \cap G|}{5}, \quad
+\text{Recall@5} = \frac{|T_5 \cap G|}{|G|}
+\label{eq:pr}
+\end{equation}
+
+를 측정했다. JSON 형식을 잘 지키는지, 그리고 실제로 존재하지 않는 학교를 추천하는 hallucination rate도 같이 측정했다. 한 가지 한계점은 정답 집합이 지역 및 학위 조건만 보고 정해지기에 전공이나 CGPA 같은 세부 조건은 평가에 들어가지 않는다는 점이다 — LLM이 세부 조건까지 고려해서 합리적으로 추천해도 이 기준에서는 오답으로 잡힐 수 있다.
+
+\subsection{실제 서비스에 적용}
+검색 단계를 실제 웹 서비스(Node.js/Express + Google Maps)에도 연결했다. 원래는 138개 학교 전체를 매번 LLM에 보내던 방식을, 질문과 관련된 top-15개만 보내는 방식으로 바꿨다. 또한 질문에 지역이나 학위과정 정보가 없으면 추천 전에 한 번만 더 물어보는 간단한 멀티턴 기능도 추가했다.
+
+\section{Results}
+\label{sec:exp}
+
+\begin{table}[t]
+\centering
+\small
+\begin{tabular}{lcccc}
+\toprule
+Method & P@5 & R@5 & JSON & Halluc. \\
+\midrule
+Rule-based   & 1.00 & 0.35 & 1.00 & 0.00 \\
+Zero-shot    & 0.50 & 0.04 & 1.00 & 0.19 \\
+Fine-tuned   & 0.50 & 0.04 & 1.00 & 0.19 \\
+\bottomrule
+\end{tabular}
+\caption{테스트 페르소나 8개에 대한 3-way 비교. 규칙 기반이 정확도에서 두 LLM 방법을
+크게 앞섰고, 두 LLM 방법끼리는 거의 차이가 없다.}
+\label{tab:main}
+\end{table}
+
+\Cref{tab:main}에서 두 가지가 눈에 띈다. 첫째, 규칙 기반이
+Precision@5 1.00, Recall@5 0.35로 두 LLM 방법(각각 0.50, 0.04)보다 훨씬 낫다. 자격조건이
+명확한 과제에는 결정적 필터링이 더 안전하다는 뜻이다. 둘째, zero-shot과 fine-tuned 결과가
+거의 똑같다 — 32개 예시로는 LoRA 학습이 별 효과가 없었다는 뜻이다.
+
+\textbf{Hallucination.} 두 LLM 방법 모두 추천의 약 19\%가 실제로 존재하지 않는 학교였다.
+8개 페르소나 중 3개(persona 3, 7, 8)에서 일어났는데, \textbf{zero-shot과 fine-tuned가 만든
+가짜 학교 이름이 완전히 똑같았다} (북미 대학원·정치외교학 질문엔 University of Notre Dame,
+University of Virginia, University of Pennsylvania를, 아시아 대학원·경영학 질문엔 National
+Yang Ming Chiao Tung University를, 유럽 학부·공학 질문엔 INSA de Lyon을 반복 생성). 이
+이름들은 모두 실제로 존재하는 대학이지만 서강대 교환협정 명단에는 없는 곳이다. 즉 모델이
+검색된 후보를 무시하고, 사전학습 때 본 "그럴듯한 유명 대학 이름"을 그대로 가져다 쓴 것으로
+보인다. zero-shot과 fine-tuned의 결과가 똑같다는 점은 32개짜리 파인튜닝이 이 행동을 전혀
+못 바꿨다는 추가 증거다.
+
+\begin{table}[t]
+\centering
+\small
+\begin{tabular}{cccc}
+\toprule
+$k$ & P@5 & R@5 & Halluc. \\
+\midrule
+5  & 0.60 & 0.04 & 0.075 \\
+10 & 0.50 & 0.04 & 0.192 \\
+20 & 0.50 & 0.07 & 0.042 \\
+\bottomrule
+\end{tabular}
+\caption{검색 후보 수 $k$에 따른 fine-tuned 모델 성능 (8개 페르소나 평균).}
+\label{tab:ablation}
+\end{table}
+
+\textbf{Top-$k$ ablation.} \Cref{tab:ablation}을 보면 $k$가 커질수록 Recall@5는 조금씩
+오르고, hallucination rate는 $k=20$에서 가장 낮다 — 후보가 많을수록 정답을 포함할 가능성도,
+답을 찾을 근거도 늘어난다는 뜻일 수 있다.
+
+\textbf{제품 적용.} 검색 단계를 실제 웹앱에 연결한 결과, ``GPA 3.5고 토플 104점인데, 미국에서
+경영 전공으로 갈 수 있는 학교 보여줘''라는 질문에 138개 전체 대신 top-15 후보만 주고도 HEC
+Montreal, Case Western Reserve University, Fordham University 등 타당한 추천과 설명을
+만들어내고, 지도에 해당 학교들을 바로 하이라이트했다 (\Cref{fig:webapp}) — 노트북에서 확인한
+검색 방식이 실제 서비스에서도 똑같이 동작했다.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.8\columnwidth]{figs/website_demo.jpeg}
+\caption{실제 웹앱에서 질문 입력 → top-15 검색 → 추천 학교 지도 하이라이트가 동작하는 화면.}
+\label{fig:webapp}
+\end{figure}
+
+\section{Conclusion}
+\label{sec:conclusion}
+답이 명확한 자격조건 매칭 과제에는 규칙 기반 필터링이 생성형 LLM보다 정확하고 안전했다.
+생성형 LLM 두 방법 모두 약 19\%의 hallucination이라는 비용이 있었고, 32개 규모의 학습
+데이터로는 LoRA 파인튜닝이 zero-shot보다 나아지지 않았다. 학습 데이터를 더 늘리면 이게
+달라지는지 확인해보려 했으나, 시간과 API 비용 문제로 끝까지 마치지 못해 \textbf{Future Work로
+남긴다}. 그래도 전공·선호도처럼 자유롭게 표현된 조건을 이해하고 설명을 만드는 데는 여전히
+생성형 LLM이 필요하다. 이 프로젝트에서 만든 검색-필터링과, 부족한 정보를 한 번 더 물어보는
+멀티턴 방식을 같이 쓰면 hallucination 위험을 줄이면서도 이 장점을 살릴 수 있을 것이다.
+
+%%%%%%%%% REFERENCES
+{\small
+\bibliographystyle{ieee_fullname}
+\bibliography{egbib}
+}
+
+\end{document}

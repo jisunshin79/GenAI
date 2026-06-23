@@ -1,3 +1,7 @@
 node_modules/
 .env
 .DS_Store
+__pycache__/
+genai_course_project/project_for_colab/
+genai_course_project/project_for_colab.zip
+genai_course_project/code_submission.zip

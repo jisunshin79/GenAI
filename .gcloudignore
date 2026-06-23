@@ -1,0 +1,14 @@
+.git
+.gitignore
+.DS_Store
+.env
+.env.local
+.env.example
+.vscode
+.claude
+node_modules
+genai_course_project
+data
+docs
+scripts
+*.md

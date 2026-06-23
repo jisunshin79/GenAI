@@ -5,16 +5,51 @@ const fs = require('fs');
 const Anthropic = require('@anthropic-ai/sdk');
 
 const app = express();
-app.use(express.static('public'));
+app.use(express.static('public', { index: false }));
 app.use(express.json());
 
 const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
-// Load university data once at startup (used as cached prompt context)
+// Load university data once at startup
 const universityData = JSON.parse(
   fs.readFileSync(path.join(__dirname, 'public/data.json'), 'utf-8')
 );
-const universityDataStr = JSON.stringify(universityData);
+
+// genai_course_project/common.py의 to_document()와 동일한 필드 구성.
+// 전체 데이터셋을 매번 Claude에 통째로 넘기는 대신, 질의와 겹치는 키워드가
+// 많은 학교만 top-k로 추려서 보낸다 (논문 노트북에서 검증한 RAG 검색 방식).
+function toDocument(u) {
+  return [
+    u['파견기관'], u['국가'], u['소재도시'], u['대륙'],
+    `강의언어: ${u['강의언어'] || ''}`,
+    `CGPA 기준: ${u['CGPA'] || ''}`,
+    `어학 기준: ${u['어학 기준(총점)'] || ''}`,
+    `전공제한: ${u['전공제한'] || ''}`,
+    `학기제한: ${u['학기제한'] || ''}`,
+    `학부/대학원: ${u['학부/대학원'] || ''}`,
+    u['비고'] || '',
+  ].filter(Boolean).join('\n');
+}
+
+const universityDocs = universityData.map(toDocument);
+
+const STOPWORDS = new Set(['만점', '없음', '전체', '상관없음', '미입력', '추가', '요청', '학생', '프로필']);
+
+function retrieveTopK(query, k = 15) {
+  const tokens = query
+    .replace(/[.,!?~()/:-]/g, ' ')
+    .split(/\s+/)
+    .filter(t => t.length >= 2 && !STOPWORDS.has(t));
+
+  const scored = universityData.map((u, i) => ({
+    u,
+    score: tokens.reduce((acc, t) => acc + (universityDocs[i].includes(t) ? 1 : 0), 0),
+  }));
+  scored.sort((a, b) => b.score - a.score);
+
+  const hits = scored.filter(s => s.score > 0);
+  return (hits.length > 0 ? hits : scored).slice(0, k).map(s => s.u);
+}
 
 app.get('/', (req, res) => {
   const html = fs.readFileSync(path.join(__dirname, 'public/index.html'), 'utf-8');
@@ -45,6 +80,8 @@ app.post('/api/recommend', async (req, res) => {
     return res.status(400).json({ error: '질문 또는 프로필을 입력해주세요.' });
   }
 
+  const candidates = retrieveTopK(userMessage, 15);
+
   try {
     const response = await client.messages.create({
       model: 'claude-sonnet-4-6',
@@ -68,8 +105,7 @@ app.post('/api/recommend', async (req, res) => {
         },
         {
           type: 'text',
-          text: `서강대학교 파트너 대학 데이터:\n${universityDataStr}`,
-          cache_control: { type: 'ephemeral' }
+          text: `서강대학교 파트너 대학 데이터 (질의와 관련성 높은 상위 ${candidates.length}개만 전달됨):\n${JSON.stringify(candidates)}`
         }
       ],
       messages: [{ role: 'user', content: userMessage }]

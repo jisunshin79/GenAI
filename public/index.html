@@ -3,6 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <title>Exchange Universities Map</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
@@ -21,19 +24,19 @@
   <div id="map"></div>
 
   <!-- AI 패널 토글 버튼 -->
-  <button id="aiToggleBtn" class="ai-toggle-btn">✨ AI 추천</button>
+  <button id="aiToggleBtn" class="ai-toggle-btn">AI 추천</button>
 
   <!-- AI 어드바이저 사이드 패널 -->
   <div id="aiPanel" class="ai-panel">
     <div class="ai-panel-header">
-      <span>🎓 AI 교환학생 어드바이저</span>
+      <span>AI 교환학생 어드바이저</span>
       <button id="aiCloseBtn" class="ai-close-btn">✕</button>
     </div>
 
     <!-- 탭 -->
     <div class="ai-tabs">
-      <button class="ai-tab-btn active" data-tab="chat">💬 자유 검색</button>
-      <button class="ai-tab-btn" data-tab="profile">📋 맞춤 진단</button>
+      <button class="ai-tab-btn active" data-tab="chat">자유 검색</button>
+      <button class="ai-tab-btn" data-tab="profile">맞춤 진단</button>
     </div>
 
     <!-- 자유 검색 탭 -->
@@ -104,7 +107,7 @@
     <!-- 로딩 -->
     <div id="aiLoading" class="ai-loading hidden">
       <div class="spinner"></div>
-      <p>AI가 분석 중이에요...</p>
+      <p>138개 학교를 살펴보고 있어요</p>
     </div>
 
     <!-- 결과 -->
@@ -113,6 +116,7 @@
         <span>추천 결과</span>
         <button onclick="resetAiResults()" class="reset-btn">← 전체 보기</button>
       </div>
+      <div class="ai-explanation-label">추천 이유</div>
       <div id="aiExplanation" class="ai-explanation"></div>
       <div id="aiUnivList" class="ai-univ-list"></div>
     </div>
